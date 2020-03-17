@@ -1,6 +1,7 @@
 package intr3x.engine;
 
 import kotlin.Pair;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 import javax.swing.*;
@@ -10,6 +11,7 @@ import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 import java.util.function.Consumer;
 
 public abstract class Engine {
@@ -24,18 +26,22 @@ public abstract class Engine {
         }
     }
 
+    protected static final Logger logger = Logger.getLogger(Engine.class);
+    static {
+        logger.setLevel(Level.INFO);
+    }
+
     protected final BufferedImage image;
     private final EngineCanvas engineCanvas;
     protected final int height, width;
     private final Frame frame;
     private final Thread updateThread;
-    protected static final Logger logger = Logger.getLogger(Engine.class);
     private boolean paused = false;
     private Graphics2D graphics = null;
     private List<Pair<KeyEventFilter, Consumer<KeyEvent>>> keyTypedListeners = new ArrayList<>();
     private List<Pair<KeyEventFilter, Consumer<KeyEvent>>> keyPressedListeners = new ArrayList<>();
     private List<Pair<KeyEventFilter, Consumer<KeyEvent>>> keyReleasedListeners = new ArrayList<>();
-    protected double maxFPS = 30;
+    protected double maxFPS = 120;
 
     public Engine(int h, int w) {
         image = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);

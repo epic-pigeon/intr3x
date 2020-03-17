@@ -17,6 +17,7 @@ class Engine3D(h: Int, w: Int) : Engine(h, w) {
     }
     private var counter: Int = 0
     private var totalTime: Double = 0.0
+    private val camera = Vector(0.0, 0.0, 0.0)
 
     private val cube: Mesh = Mesh(listOf(
         Triangle(Vector(0.0, 0.0, 0.0), Vector(0.0, 1.0, 0.0), Vector(1.0, 1.0, 0.0)),
@@ -62,50 +63,41 @@ class Engine3D(h: Int, w: Int) : Engine(h, w) {
     private fun drawTriangle(triangle: Triangle) {
         val rotated = triangle * rotationX * rotationZ
 
-        val translated = Triangle(
-            Vector(
-                rotated.vector1.x - 0.5,
-                rotated.vector1.y - 0.5,
-                rotated.vector1.z + 2.0
-            ),
-            Vector(
-                rotated.vector2.x - 0.5,
-                rotated.vector2.y - 0.5,
-                rotated.vector2.z + 2.0
-            ),
-            Vector(
-                rotated.vector3.x - 0.5,
-                rotated.vector3.y - 0.5,
-                rotated.vector3.z + 2.0
+        val translated = rotated.transform {
+            return@transform Vector(it.x - 0.5, it.y - 0.5, it.z + 2.5)
+        }
+
+        val normal = (translated.vector2 - translated.vector1 crossProduct translated.vector3 - translated.vector1).normalizeToLength(1.0)
+
+        if (normal dotProduct (translated.vector1 - camera) <= 0.0) {
+            val projected = translated * matrix
+            val scaled = Triangle(
+                Vector(
+                    (projected.vector1.x + 1) * 0.5 * width,
+                    (projected.vector1.y + 1) * 0.5 * height,
+                    projected.vector1.z
+                ),
+                Vector(
+                    (projected.vector2.x + 1) * 0.5 * width,
+                    (projected.vector2.y + 1) * 0.5 * height,
+                    projected.vector2.z
+                ),
+                Vector(
+                    (projected.vector3.x + 1) * 0.5 * width,
+                    (projected.vector3.y + 1) * 0.5 * height,
+                    projected.vector3.z
+                )
             )
-        )
-        val projected = translated * matrix
-        val scaled = Triangle(
-            Vector(
-                (projected.vector1.x + 1) * 0.5 * width,
-                (projected.vector1.y + 1) * 0.5 * height,
-                projected.vector1.z
-            ),
-            Vector(
-                (projected.vector2.x + 1) * 0.5 * width,
-                (projected.vector2.y + 1) * 0.5 * height,
-                projected.vector2.z
-            ),
-            Vector(
-                (projected.vector3.x + 1) * 0.5 * width,
-                (projected.vector3.y + 1) * 0.5 * height,
-                projected.vector3.z
+            graphics.stroke = BasicStroke(1.0F)
+            //graphics.drawLine(scaled.vector1.x.toInt(), scaled.vector1.y.toInt(), scaled.vector2.x.toInt(), scaled.vector2.y.toInt())
+            //graphics.drawLine(scaled.vector2.x.toInt(), scaled.vector2.y.toInt(), scaled.vector3.x.toInt(), scaled.vector3.y.toInt())
+            //graphics.drawLine(scaled.vector1.x.toInt(), scaled.vector1.y.toInt(), scaled.vector3.x.toInt(), scaled.vector3.y.toInt())
+            graphics.drawPolygon(
+                intArrayOf(scaled.vector1.x.toInt(), scaled.vector2.x.toInt(), scaled.vector3.x.toInt()),
+                intArrayOf(scaled.vector1.y.toInt(), scaled.vector2.y.toInt(), scaled.vector3.y.toInt()),
+                3
             )
-        )
-        graphics.stroke = BasicStroke(1.0F)
-        //graphics.drawLine(scaled.vector1.x.toInt(), scaled.vector1.y.toInt(), scaled.vector2.x.toInt(), scaled.vector2.y.toInt())
-        //graphics.drawLine(scaled.vector2.x.toInt(), scaled.vector2.y.toInt(), scaled.vector3.x.toInt(), scaled.vector3.y.toInt())
-        //graphics.drawLine(scaled.vector1.x.toInt(), scaled.vector1.y.toInt(), scaled.vector3.x.toInt(), scaled.vector3.y.toInt())
-        graphics.drawPolygon(
-            intArrayOf(scaled.vector1.x.toInt(), scaled.vector2.x.toInt(), scaled.vector3.x.toInt()),
-            intArrayOf(scaled.vector1.y.toInt(), scaled.vector2.y.toInt(), scaled.vector3.y.toInt()),
-            3
-        )
-        logger.debug(triangle)
+            logger.debug(triangle)
+        }
     }
 }
