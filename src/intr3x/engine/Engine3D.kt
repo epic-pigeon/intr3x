@@ -16,6 +16,7 @@ class Engine3D(h: Int, w: Int) : Engine(h, w) {
 
     }
     private var counter: Int = 0
+    private var totalTime: Double = 0.0
 
     private val cube: Mesh = Mesh(listOf(
         Triangle(Vector(0.0, 0.0, 0.0), Vector(0.0, 1.0, 0.0), Vector(1.0, 1.0, 0.0)),
@@ -38,8 +39,11 @@ class Engine3D(h: Int, w: Int) : Engine(h, w) {
     ))
 
     private val matrix: Matrix = Matrix.createProjectionMatrix(0.1, 1000.0, 90.0, height.toDouble() / width)
+    private var rotationX: Matrix = Matrix.createXRotationMatrix(0.0)
+    private var rotationZ: Matrix = Matrix.createZRotationMatrix(0.0)
 
     override fun onUpdate(timeElapsed: Double) {
+        totalTime += timeElapsed
         //Thread.sleep(10)
         logger.info("Update called, FPS: ${1 / timeElapsed}")
         graphics.color = Color.BLACK
@@ -48,25 +52,31 @@ class Engine3D(h: Int, w: Int) : Engine(h, w) {
         graphics.color = Color.WHITE
         cube.triangles.forEach { drawTriangle(it) }
         //drawTriangle(cube.triangles[0])
+        if (totalTime > 0) {
+            rotationX = Matrix.createXRotationMatrix(totalTime)
+            rotationZ = Matrix.createZRotationMatrix(totalTime * 0.5)
+        }
         counter++
     }
 
     private fun drawTriangle(triangle: Triangle) {
+        val rotated = triangle * rotationX * rotationZ
+
         val translated = Triangle(
             Vector(
-                triangle.vector1.x - 0.5,
-                triangle.vector1.y - 0.5,
-                triangle.vector1.z + 3.0
+                rotated.vector1.x - 0.5,
+                rotated.vector1.y - 0.5,
+                rotated.vector1.z + 2.0
             ),
             Vector(
-                triangle.vector2.x - 0.5,
-                triangle.vector2.y - 0.5,
-                triangle.vector2.z + 3.0
+                rotated.vector2.x - 0.5,
+                rotated.vector2.y - 0.5,
+                rotated.vector2.z + 2.0
             ),
             Vector(
-                triangle.vector3.x - 0.5,
-                triangle.vector3.y - 0.5,
-                triangle.vector3.z + 3.0
+                rotated.vector3.x - 0.5,
+                rotated.vector3.y - 0.5,
+                rotated.vector3.z + 2.0
             )
         )
         val projected = translated * matrix

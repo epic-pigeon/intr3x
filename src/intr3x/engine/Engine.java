@@ -35,7 +35,7 @@ public abstract class Engine {
     private List<Pair<KeyEventFilter, Consumer<KeyEvent>>> keyTypedListeners = new ArrayList<>();
     private List<Pair<KeyEventFilter, Consumer<KeyEvent>>> keyPressedListeners = new ArrayList<>();
     private List<Pair<KeyEventFilter, Consumer<KeyEvent>>> keyReleasedListeners = new ArrayList<>();
-    protected double maxFPS = 1;
+    protected double maxFPS = 30;
 
     public Engine(int h, int w) {
         image = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);

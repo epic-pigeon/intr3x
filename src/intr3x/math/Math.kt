@@ -1,6 +1,8 @@
 package intr3x.math
 
 import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sin
 import kotlin.math.tan
 
 data class Vector(val x: Double, val y: Double, val z: Double) {
@@ -41,6 +43,33 @@ class Matrix private constructor(val value: List<List<Double>>) {
                 listOf(                 0.0, fovRad,        0.0, 0.0),
                 listOf(                 0.0,    0.0,          q, 1.0),
                 listOf(                 0.0,    0.0, -zNear * q, 0.0)
+            )
+            return Matrix(value)
+        }
+        fun createXRotationMatrix(radians: Double): Matrix {
+            val value = listOf(
+                listOf(1.0,           0.0,          0.0, 0.0),
+                listOf(0.0,  cos(radians), sin(radians), 0.0),
+                listOf(0.0, -sin(radians), cos(radians), 0.0),
+                listOf(0.0,           0.0,          0.0, 1.0)
+            )
+            return Matrix(value)
+        }
+        fun createZRotationMatrix(radians: Double): Matrix {
+            val value = listOf(
+                listOf( cos(radians), sin(radians), 0.0, 0.0),
+                listOf(-sin(radians), cos(radians), 0.0, 0.0),
+                listOf(          0.0,          0.0, 1.0, 0.0),
+                listOf(          0.0,          0.0, 0.0, 1.0)
+            )
+            return Matrix(value)
+        }
+        fun createYRotationMatrix(radians: Double): Matrix {
+            val value = listOf(
+                listOf(cos(radians),          0.0, -sin(radians), 0.0),
+                listOf(         0.0,          1.0,           0.0, 0.0),
+                listOf(sin(radians),          0.0,  cos(radians), 0.0),
+                listOf(         0.0,          0.0,           0.0, 1.0)
             )
             return Matrix(value)
         }
