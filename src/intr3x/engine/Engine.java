@@ -26,7 +26,7 @@ public abstract class Engine {
 
     protected final BufferedImage image;
     private final EngineCanvas engineCanvas;
-    private final int h, w;
+    protected final int height, width;
     private final Frame frame;
     private final Thread updateThread;
     protected static final Logger logger = Logger.getLogger(Engine.class);
@@ -35,12 +35,13 @@ public abstract class Engine {
     private List<Pair<KeyEventFilter, Consumer<KeyEvent>>> keyTypedListeners = new ArrayList<>();
     private List<Pair<KeyEventFilter, Consumer<KeyEvent>>> keyPressedListeners = new ArrayList<>();
     private List<Pair<KeyEventFilter, Consumer<KeyEvent>>> keyReleasedListeners = new ArrayList<>();
+    protected double maxFPS = 1;
 
     public Engine(int h, int w) {
         image = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
         for (int i = 0; i < w; i++) for (int j = 0; j < h; j++) image.setRGB(i, j, 0);
         engineCanvas = new EngineCanvas(h, w);
-        this.h = h; this.w = w;
+        this.height = h; this.width = w;
 
         try {
             onCreate();
@@ -75,20 +76,36 @@ public abstract class Engine {
         });
 
         updateThread = new Thread(() -> {
-            long diff = 0;
+            double diff = 0;
             while (true) {
                 if (!paused) {
                     long nanos = System.nanoTime();
                     try {
-                        onUpdate((double) diff / 1000000000);
+                        onUpdate(diff);
                     } catch (Exception e) {
                         throw new RuntimeException("Error occurred when updating", e);
                     }
                     engineCanvas.repaint();
-                    diff = System.nanoTime() - nanos;
+                    diff = (double)(System.nanoTime() - nanos) / 1000000000;
+                    if (maxFPS > 0 && diff < 1 / maxFPS) {
+                        try {
+                            Thread.sleep((long)((1 / maxFPS - diff) * 1000));
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        diff = (double)(System.nanoTime() - nanos) / 1000000000;
+                    }
                 }
             }
         });
+    }
+
+    public double getMaxFPS() {
+        return maxFPS;
+    }
+
+    public void setMaxFPS(double maxFPS) {
+        this.maxFPS = maxFPS;
     }
 
     public void start() {

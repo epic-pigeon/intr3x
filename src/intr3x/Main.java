@@ -8,7 +8,7 @@ public class Main {
     public static void main(String[] args) {
         BasicConfigurator.configure();
 
-        Engine engine = new Engine3D(1080, 1920);
+        Engine engine = new Engine3D(500, 900);
         engine.start();
     }
 }
